@@ -22,6 +22,9 @@ use IPub\OAuth;
 
 class OAuthExtension extends DI\CompilerExtension
 {
+	// Define tag string for filters
+	const TAG_SIGNATURE_METHOD = 'ipub.oauth.signature';
+
 	/**
 	 * OAuth version
 	 */
@@ -64,7 +67,21 @@ class OAuthExtension extends DI\CompilerExtension
 
 		$builder->addDefinition($this->prefix('signature.hmacsha1'))
 			->setClass('IPub\OAuth\Signature\HMAC_SHA1')
-			->addTag('oauth.signature');
+			->addTag(self::TAG_SIGNATURE_METHOD);
+	}
+
+	public function beforeCompile()
+	{
+		$builder = $this->getContainerBuilder();
+
+		// Get web loader factory
+		$httpClient = $builder->getDefinition($this->prefix('httpClient'));
+
+		// Get all registered signature methods
+		foreach (array_keys($builder->findByTag(self::TAG_SIGNATURE_METHOD)) as $serviceName) {
+			// Register signature method to http client
+			$httpClient->addSetup('registerSignatureMethod', ['@' .$serviceName]);
+		}
 	}
 
 	/**

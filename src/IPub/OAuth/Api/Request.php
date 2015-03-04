@@ -20,7 +20,7 @@ use Nette\Utils;
 
 use IPub;
 use IPub\OAuth;
-use Tracy\Debugger;
+use IPub\OAuth\Signature;
 
 /**
  * @package		iPublikuj:OAuth!
@@ -68,15 +68,9 @@ class Request extends Nette\Object
 	 */
 	private $token;
 
-	/**
-	 * @var OAuth\Signature\SignatureMethod
-	 */
-	private $signatureMethod;
-
 	public function __construct(OAuth\Consumer $consumer, Http\Url $url, $method = self::GET, array $post = [], array $headers = [], OAuth\Token $token = NULL)
 	{
 		$this->consumer = $consumer;
-		$this->signatureMethod = new OAuth\Signature\HMAC_SHA1();
 		$this->token = $token;
 
 		$this->url = $url;
@@ -104,7 +98,7 @@ class Request extends Nette\Object
 			'oauth_consumer_key' => $this->consumer->getKey(),
 		];
 
-		if ($token) {
+		if ($token && $token->getToken()) {
 			$defaults['oauth_token'] = $this->token->getToken();
 		}
 
@@ -117,8 +111,6 @@ class Request extends Nette\Object
 	 */
 	public function getUrl()
 	{
-		$this->signRequest();
-
 		return clone $this->url;
 	}
 
@@ -328,23 +320,18 @@ class Request extends Nette\Object
 	/**
 	 * Sign current request
 	 *
+	 * @param Signature\SignatureMethod $method
+	 *
 	 * @return $this
 	 */
-	public function signRequest()
+	public function signRequest(Signature\SignatureMethod $method)
 	{
-		$this->url->setQueryParameter('oauth_signature_method', $this->signatureMethod->getName());
-		$this->url->setQueryParameter('oauth_signature', $this->buildSignature());
+		$this->url->setQueryParameter('oauth_signature_method', $method->getName());
+
+		$signature = $method->buildSignature($this->getSignatureBaseString(), $this->consumer, $this->token);
+
+		$this->url->setQueryParameter('oauth_signature', $signature);
 
 		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function buildSignature()
-	{
-		$signature = $this->signatureMethod->buildSignature($this->getSignatureBaseString(), $this->consumer, $this->token);
-
-		return $signature;
 	}
 }

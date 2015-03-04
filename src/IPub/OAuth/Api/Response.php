@@ -140,12 +140,22 @@ class Response extends Nette\Object
 				return $this->arrayContent = Utils\Json::decode($this->content, Utils\Json::FORCE_ARRAY);
 
 			} catch (Utils\JsonException $jsonException) {
-				$e = new Exceptions\ApiException($jsonException->getMessage() . ($this->content ? "\n\n" . $this->content : ''), $this->httpCode, $jsonException);
-				$e->bindResponse($this->request, $this);
-				throw $e;
+				$ex = new Exceptions\ApiException($jsonException->getMessage() . ($this->content ? "\n\n" . $this->content : ''), $this->httpCode, $jsonException);
+				$ex->bindResponse($this->request, $this);
+				throw $ex;
 			}
 
 		} else if ($this->isXml()) {
+			try {
+				$xml = simplexml_load_string($this->content);
+				$json = json_encode($xml);
+				return json_decode($json,TRUE);
+
+			} catch (Utils\JsonException $jsonException) {
+				$ex = new Exceptions\ApiException($jsonException->getMessage() . ($this->content ? "\n\n" . $this->content : ''), $this->httpCode, $jsonException);
+				$ex->bindResponse($this->request, $this);
+				throw $ex;
+			}
 
 		} else if ($this->isQueryString()) {
 			parse_str($this->content, $result);

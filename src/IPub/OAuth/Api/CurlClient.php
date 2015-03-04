@@ -23,6 +23,7 @@ use Kdyby\CurlCaBundle;
 
 use IPub;
 use IPub\OAuth;
+use IPub\OAuth\Signature;
 use IPub\OAuth\Exceptions;
 
 if (!defined('CURLE_SSL_CACERT_BADFILE')) {
@@ -86,9 +87,54 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 	 */
 	private $memoryCache = [];
 
+	/**
+	 * @var Signature\SignatureMethod[]
+	 */
+	private $signatureMethods = [];
+
 	public function __construct()
 	{
 		$this->curlOptions = self::$defaultCurlOptions;
+	}
+
+	/**
+	 * @param Signature\SignatureMethod $method
+	 *
+	 * @return $this
+	 */
+	public function registerSignatureMethod(Signature\SignatureMethod $method)
+	{
+		$this->signatureMethods[$method->getName()] = $method;
+
+		return $this;
+	}
+
+	/**
+	 * @param Signature\SignatureMethod $method
+	 *
+	 * @return $this
+	 */
+	public function setSignatureMethod(Signature\SignatureMethod $method)
+	{
+		$this->signatureMethods[$method->getName()] = $method;
+
+		return $this;
+	}
+
+	/**
+	 * @param string $name
+	 *
+	 * @return Signature\SignatureMethod|null
+	 */
+	public function getSignatureMethod($name)
+	{
+		$name = (string) $name;
+
+		if (isset($this->signatureMethods[$name])) {
+			return $this->signatureMethods[$name];
+		}
+
+		return NULL;
 	}
 
 	/**
@@ -97,16 +143,20 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 	 * make the request.
 	 *
 	 * @param Request $request
+	 * @param string $signatureMethod
 	 *
 	 * @return Response
 	 *
 	 * @throws Exceptions\ApiException
 	 */
-	public function makeRequest(Request $request)
+	public function makeRequest(Request $request, $signatureMethod = 'PLAINTEXT')
 	{
 		if (isset($this->memoryCache[$cacheKey = md5(serialize($request))])) {
 			return $this->memoryCache[$cacheKey];
 		}
+
+		// Sign request with selected method
+		$request->signRequest($this->getSignatureMethod($signatureMethod));
 
 		$ch = $this->buildCurlResource($request);
 

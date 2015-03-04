@@ -16,9 +16,6 @@ namespace IPub\OAuth;
 
 use Nette;
 
-use IPub;
-use IPub\OAuth\Utils;
-
 class Token extends Nette\Object
 {
 	/**
@@ -89,9 +86,9 @@ class Token extends Nette\Object
 	 */
 	function __toString()
 	{
-		return "oauth_token=" .
-			Utils\Url::urlEncodeRFC3986($this->token) .
-			"&oauth_token_secret=" .
-			Utils\Url::urlEncodeRFC3986($this->secret);
+		return json_encode([
+			'oauth_token' => $this->token,
+			'oauth_token_secret' => $this->secret
+		]);
 	}
 }
