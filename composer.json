@@ -44,7 +44,11 @@
 	"autoload": {
 		"psr-0": {
 			"IPub\\OAuth\\": "src/"
-		}
+		},
+		"classmap": [
+			"src/IPub/OAuth/Signature/HMAC_SHA1.php",
+			"src/IPub/OAuth/Signature/RSA_SHA1.php"
+		]
 	},
 
 	"autoload-dev": {
