@@ -29,7 +29,7 @@ use IPub\OAuth\Signature;
  * @author Filip Procházka <filip@prochazka.su>
  * @author Adam Kadlec <adam.kadlec@fastybird.com>
  */
-class Request extends Nette\Object
+abstract class Request extends Nette\Object
 {
 	const GET = 'GET';
 	const HEAD = 'HEAD';
@@ -41,43 +41,37 @@ class Request extends Nette\Object
 	/**
 	 * @var Http\Url
 	 */
-	private $url;
+	protected $url;
 
 	/**
 	 * @var string
 	 */
-	private $method;
+	protected $method;
 
 	/**
 	 * @var array
 	 */
-	private $post = [];
+	protected $post = [];
 
 	/**
 	 * @var array
 	 */
-	private $headers;
+	protected $headers = [];
 
 	/**
 	 * @var OAuth\Consumer
 	 */
-	private $consumer;
+	protected $consumer;
 
 	/**
 	 * @var OAuth\Token
 	 */
-	private $token;
+	protected $token;
 
-	/**
-	 * @var bool
-	 */
-	private $isAuthenticated;
-
-	public function __construct(OAuth\Consumer $consumer, Http\Url $url, $method = self::GET, array $post = [], array $headers = [], OAuth\Token $token = NULL, $isAuthenticated = FALSE)
+	public function __construct(OAuth\Consumer $consumer, Http\Url $url, $method = self::GET, array $post = [], array $headers = [], OAuth\Token $token = NULL)
 	{
 		$this->consumer = $consumer;
 		$this->token = $token;
-		$this->isAuthenticated = $isAuthenticated;
 
 		$this->url = $url;
 		$this->method = strtoupper($method);
@@ -201,7 +195,7 @@ class Request extends Nette\Object
 	 */
 	public function getPost()
 	{
-		return array_merge($this->post, $this->getParameters());
+		return $this->post;
 	}
 
 	/**
@@ -209,6 +203,22 @@ class Request extends Nette\Object
 	 */
 	public function getHeaders()
 	{
+		if ($this->url->getQueryParameter('oauth_token', FALSE) && !$this->url->getQueryParameter('oauth_verifier', FALSE)) {
+			$parameters = $this->getParameters();
+			ksort($parameters, SORT_STRING);
+			$authHeader = NULL;
+
+			foreach ($parameters as $key => $value) {
+				if (strpos($key, 'oauth_') !== FALSE) {
+					$authHeader .= ' ' . $key . '="' . $value . '",';
+				}
+			}
+
+			if ($authHeader) {
+				$this->headers['Authorization'] = 'OAuth ' . trim(rtrim($authHeader, ','));
+			}
+		}
+
 		return $this->headers;
 	}
 
@@ -259,12 +269,12 @@ class Request extends Nette\Object
 	public function getSignatureBaseString()
 	{
 		$parts = [
-			OAuth\Utils\Url::urlEncodeRFC3986($this->method),
-			OAuth\Utils\Url::urlEncodeRFC3986($this->url->hostUrl . $this->url->path),
-			OAuth\Utils\Url::urlEncodeRFC3986($this->getSignableParameters())
+			$this->method,
+			$this->url->hostUrl . $this->url->path,
+			$this->getSignableParameters()
 		];
 
-		return implode('&', $parts);
+		return implode('&', OAuth\Utils\Url::urlEncodeRFC3986($parts));
 	}
 
 	/**
@@ -273,19 +283,7 @@ class Request extends Nette\Object
 	 *
 	 * @return string
 	 */
-	public function getSignableParameters()
-	{
-		// Grab all parameters
-		$params = array_merge($this->getParameters(), $this->post);
-
-		// Remove oauth_signature if present
-		// Ref: Spec: 9.1.1 ("The oauth_signature parameter MUST be excluded.")
-		if (isset($params['oauth_signature'])) {
-			unset($params['oauth_signature']);
-		}
-
-		return OAuth\Utils\Url::buildHttpQuery($params);
-	}
+	abstract public function getSignableParameters();
 
 	/**
 	 * @param Http\UrlScript $url
@@ -297,7 +295,7 @@ class Request extends Nette\Object
 		$headers = $this->headers;
 		array_shift($headers); // drop info about HTTP version
 
-		return new static(new Http\Url($url), $this->getMethod(), $this->post, $headers);
+		return new static($this->consumer, new Http\Url($url), $this->getMethod(), $this->post, $headers);
 	}
 
 	/**
@@ -339,13 +337,5 @@ class Request extends Nette\Object
 		$this->url->setQueryParameter('oauth_signature', $signature);
 
 		return $this;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isAuthenticated()
-	{
-		return $this->isAuthenticated;
 	}
 }

@@ -215,13 +215,7 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 	 */
 	protected function buildCurlResource(Request $request)
 	{
-		$url = $request->getUrl();
-
-		if ($request->isPost()) {
-			$url->setQuery([]);
-		}
-
-		$ch = curl_init((string) $url);
+		$ch = curl_init((string) $request->getUrl());
 
 		$options = $this->curlOptions;
 		$options[CURLOPT_CUSTOMREQUEST] = $request->getMethod();
@@ -244,20 +238,6 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 		$tmp = [];
 		foreach ($request->getHeaders() + $options[CURLOPT_HTTPHEADER] as $name => $value) {
 			$tmp[] = trim("$name: $value");
-		}
-		if ($request->isAuthenticated()) {
-			$parameters = $request->getParameters();
-			ksort($parameters, SORT_STRING);
-			$authHeader = NULL;
-
-			foreach ($parameters as $key => $value) {
-				if (strpos($key, 'oauth_') !== FALSE) {
-					$authHeader .= ' ' . $key . '="' . $value . '",';
-				}
-			}
-			if ($authHeader) {
-				$tmp[] = 'Authorization: OAuth ' . trim(rtrim($authHeader, ','));
-			}
 		}
 		$options[CURLOPT_HTTPHEADER] = $tmp;
 

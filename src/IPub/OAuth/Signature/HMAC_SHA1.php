@@ -44,12 +44,11 @@ class HMAC_SHA1 extends SignatureMethod
 	public function buildSignature($baseString, OAuth\Consumer $consumer, OAuth\Token $token = NULL)
 	{
 		$keyParts = [
-			$consumer->getSecret(),
-			($token) ? $token->getSecret() : ''
+			Utils\Url::urlEncodeRFC3986($consumer->getSecret()),
+			Utils\Url::urlEncodeRFC3986(($token) ? $token->getSecret() : '')
 		];
 
-		$keyParts = Utils\Url::urlEncodeRFC3986($keyParts);
-		$key = implode('&', $keyParts);
+		$key = implode('&', Utils\Url::urlEncodeRFC3986($keyParts));
 
 		return base64_encode(hash_hmac('sha1', $baseString, $key, TRUE));
 	}
