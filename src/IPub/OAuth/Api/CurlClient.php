@@ -58,6 +58,8 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 		CURLINFO_HEADER_OUT => TRUE,
 		CURLOPT_HEADER => TRUE,
 		CURLOPT_AUTOREFERER => TRUE,
+		CURLOPT_SSL_VERIFYPEER => TRUE,
+		CURLOPT_SSL_VERIFYHOST => 2,
 	];
 
 	/**
@@ -242,6 +244,20 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 		$tmp = [];
 		foreach ($request->getHeaders() + $options[CURLOPT_HTTPHEADER] as $name => $value) {
 			$tmp[] = trim("$name: $value");
+		}
+		if ($request->isAuthenticated()) {
+			$parameters = $request->getParameters();
+			ksort($parameters, SORT_STRING);
+			$authHeader = NULL;
+
+			foreach ($parameters as $key => $value) {
+				if (strpos($key, 'oauth_') !== FALSE) {
+					$authHeader .= ' ' . $key . '="' . $value . '",';
+				}
+			}
+			if ($authHeader) {
+				$tmp[] = 'Authorization: OAuth ' . trim(rtrim($authHeader, ','));
+			}
 		}
 		$options[CURLOPT_HTTPHEADER] = $tmp;
 

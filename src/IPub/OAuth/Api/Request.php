@@ -68,10 +68,16 @@ class Request extends Nette\Object
 	 */
 	private $token;
 
-	public function __construct(OAuth\Consumer $consumer, Http\Url $url, $method = self::GET, array $post = [], array $headers = [], OAuth\Token $token = NULL)
+	/**
+	 * @var bool
+	 */
+	private $isAuthenticated;
+
+	public function __construct(OAuth\Consumer $consumer, Http\Url $url, $method = self::GET, array $post = [], array $headers = [], OAuth\Token $token = NULL, $isAuthenticated = FALSE)
 	{
 		$this->consumer = $consumer;
 		$this->token = $token;
+		$this->isAuthenticated = $isAuthenticated;
 
 		$this->url = $url;
 		$this->method = strtoupper($method);
@@ -333,5 +339,13 @@ class Request extends Nette\Object
 		$this->url->setQueryParameter('oauth_signature', $signature);
 
 		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isAuthenticated()
+	{
+		return $this->isAuthenticated;
 	}
 }

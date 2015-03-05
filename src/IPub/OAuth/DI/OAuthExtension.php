@@ -36,6 +36,7 @@ class OAuthExtension extends DI\CompilerExtension
 	 * @var array
 	 */
 	protected $defaults = [
+		'debugger' => '%debugMode%',
 		'curlOptions' => [],
 	];
 
@@ -57,7 +58,7 @@ class OAuthExtension extends DI\CompilerExtension
 			}
 		}
 
-		$builder->addDefinition($this->prefix('httpClient'))
+		$httpClient = $builder->addDefinition($this->prefix('httpClient'))
 			->setClass('IPub\OAuth\Api\CurlClient')
 			->addSetup('$service->curlOptions = ?;', [$config['curlOptions']]);
 
@@ -68,6 +69,14 @@ class OAuthExtension extends DI\CompilerExtension
 		$builder->addDefinition($this->prefix('signature.hmacsha1'))
 			->setClass('IPub\OAuth\Signature\HMAC_SHA1')
 			->addTag(self::TAG_SIGNATURE_METHOD);
+
+		if ($config['debugger']) {
+			$builder->addDefinition($this->prefix('panel'))
+				->setClass('IPub\OAuth\Diagnostics\Panel');
+
+			$httpClient
+				->addSetup($this->prefix('@panel') . '::register', array('@self'));
+		}
 	}
 
 	public function beforeCompile()

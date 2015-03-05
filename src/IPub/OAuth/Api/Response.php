@@ -102,8 +102,9 @@ class Response extends Nette\Object
 	 */
 	public function isJson()
 	{
-		return isset($this->headers['Content-Type'])
-			&& preg_match('~^application/json*~is', $this->headers['Content-Type']);
+		$contentType = $this->getHeaderContentType();
+
+		return $contentType && preg_match('~^application/json*~is', $contentType);
 	}
 
 	/**
@@ -111,8 +112,9 @@ class Response extends Nette\Object
 	 */
 	public function isXml()
 	{
-		return isset($this->headers['Content-Type'])
-		&& preg_match('~^text/xml*~is', $this->headers['Content-Type']);
+		$contentType = $this->getHeaderContentType();
+
+		return $contentType && preg_match('~^text/xml*~is', $contentType);
 	}
 
 	/**
@@ -120,8 +122,24 @@ class Response extends Nette\Object
 	 */
 	public function isQueryString()
 	{
-		return isset($this->headers['Content-Type'])
-		&& preg_match('~^text/plain*~is', $this->headers['Content-Type']);
+		$contentType = $this->getHeaderContentType();
+
+		return $contentType && (preg_match('~^text/plain*~is', $contentType) || preg_match('~^text/html*~is', $contentType));
+	}
+
+	/**
+	 * @return string|null
+	 */
+	private function getHeaderContentType()
+	{
+		if (isset($this->headers['Content-Type'])) {
+			return $this->headers['Content-Type'];
+
+		} else if (isset($this->headers['content-type'])) {
+			return $this->headers['content-type'];
+		}
+
+		return NULL;
 	}
 
 	/**
