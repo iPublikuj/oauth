@@ -209,11 +209,11 @@ abstract class Request extends Nette\Object
 	}
 
 	/**
-	 * @param array|string $post
+	 * @param array $post
 	 *
 	 * @return $this
 	 */
-	public function setPost($post)
+	public function setPost(array $post)
 	{
 		$this->post = $post;
 
@@ -256,7 +256,7 @@ abstract class Request extends Nette\Object
 	{
 		$parts = [
 			$this->method,
-			$this->url->hostUrl . $this->url->path,
+			$this->url->getHostUrl() . $this->url->getPath(),
 			$this->getSignableParameters()
 		];
 
@@ -335,7 +335,7 @@ abstract class Request extends Nette\Object
 			}
 		}
 
-		if ($authHeader) {
+		if ($authHeader !== NULL) {
 			$this->headers['Authorization'] = 'OAuth ' . trim(rtrim($authHeader, ','));
 		}
 

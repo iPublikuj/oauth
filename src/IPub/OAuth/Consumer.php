@@ -95,13 +95,13 @@ class Consumer extends Nette\Object
 	}
 
 	/**
-	 * @param string $callbackUrl
+	 * @param Http\Url $callbackUrl
 	 *
 	 * @return $this
 	 */
-	public function setCallbackUrl($callbackUrl)
+	public function setCallbackUrl(Http\Url $callbackUrl)
 	{
-		$this->callbackUrl = (string) $callbackUrl;
+		$this->callbackUrl = $callbackUrl;
 
 		return $this;
 	}

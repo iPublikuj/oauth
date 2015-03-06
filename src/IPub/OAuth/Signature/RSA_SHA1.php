@@ -49,7 +49,7 @@ abstract class RSA_SHA1 extends SignatureMethod
 	 *
 	 * Either way should return a string representation of the certificate
 	 */
-	protected abstract function fetchPublicCert($baseString);
+	abstract function fetchPublicCert($baseString);
 
 	/**
 	 * Up to the SP to implement this lookup of keys. Possible ideas are:
@@ -57,7 +57,7 @@ abstract class RSA_SHA1 extends SignatureMethod
 	 *
 	 * Either way should return a string representation of the certificate
 	 */
-	 protected abstract function fetchPrivateCert($baseString);
+	 abstract function fetchPrivateCert($baseString);
 
 	/**
 	 * {@inheritdoc}
@@ -71,7 +71,7 @@ abstract class RSA_SHA1 extends SignatureMethod
 		$privateKeyId = openssl_get_privatekey($cert);
 
 		// Sign using the key
-		$ok = openssl_sign($baseString, $signature, $privateKeyId);
+		openssl_sign($baseString, $signature, $privateKeyId);
 
 		// Release the key resource
 		openssl_free_key($privateKeyId);

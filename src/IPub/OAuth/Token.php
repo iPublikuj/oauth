@@ -92,7 +92,7 @@ class Token extends Nette\Object
 	 *
 	 * @return string
 	 */
-	function __toString()
+	public function __toString()
 	{
 		return json_encode([
 			'oauth_token' => $this->token,

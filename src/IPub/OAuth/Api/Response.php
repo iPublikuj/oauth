@@ -105,7 +105,7 @@ class Response extends Nette\Object
 	{
 		$contentType = $this->getHeaderContentType();
 
-		return $contentType && preg_match('~^application/json*~is', $contentType);
+		return $contentType !== NULL && preg_match('~^application/json*~is', $contentType);
 	}
 
 	/**
@@ -115,7 +115,7 @@ class Response extends Nette\Object
 	{
 		$contentType = $this->getHeaderContentType();
 
-		return $contentType && preg_match('~^text/xml*~is', $contentType);
+		return $contentType !== NULL && preg_match('~^text/xml*~is', $contentType);
 	}
 
 	/**
@@ -125,7 +125,7 @@ class Response extends Nette\Object
 	{
 		$contentType = $this->getHeaderContentType();
 
-		return $contentType && (preg_match('~^text/plain*~is', $contentType) || preg_match('~^text/html*~is', $contentType));
+		return $contentType !== NULL && (preg_match('~^text/plain*~is', $contentType) || preg_match('~^text/html*~is', $contentType));
 	}
 
 	/**
