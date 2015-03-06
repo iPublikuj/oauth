@@ -16,6 +16,14 @@ namespace IPub\OAuth;
 
 use Nette;
 
+/**
+ * Obtained OAuth access token storage used for operating with token and token_secret during api calls
+ *
+ * @package		iPublikuj:OAuth!
+ * @subpackage	common
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
+ */
 class Token extends Nette\Object
 {
 	/**

@@ -19,6 +19,14 @@ use Nette;
 use IPub;
 use IPub\OAuth\Exceptions;
 
+/**
+ * OAuth http call interface
+ *
+ * @package		iPublikuj:OAuth!
+ * @subpackage	common
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
+ */
 interface HttpClient
 {
 	/**

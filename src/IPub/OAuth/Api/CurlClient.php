@@ -35,6 +35,7 @@ if (!defined('CURLE_SSL_CACERT_BADFILE')) {
  * @subpackage	Api
  *
  * @author Filip Procházka <filip@prochazka.su>
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
  *
  * @method onRequest(Request $request, $options)
  * @method onError(Exceptions\IException $ex, Response $response)

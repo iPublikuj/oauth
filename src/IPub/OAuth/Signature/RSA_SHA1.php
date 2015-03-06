@@ -28,6 +28,8 @@ use IPub\OAuth\Utils;
  *
  * @package		iPublikuj:OAuth!
  * @subpackage	Signature
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
  */
 abstract class RSA_SHA1 extends SignatureMethod
 {

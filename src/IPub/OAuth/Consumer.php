@@ -17,6 +17,14 @@ namespace IPub\OAuth;
 use Nette;
 use Nette\Http;
 
+/**
+ * OAuth call consumer identification
+ *
+ * @package		iPublikuj:OAuth!
+ * @subpackage	common
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
+ */
 class Consumer extends Nette\Object
 {
 	/**
@@ -87,10 +95,35 @@ class Consumer extends Nette\Object
 	}
 
 	/**
+	 * @param string $callbackUrl
+	 *
+	 * @return $this
+	 */
+	public function setCallbackUrl($callbackUrl)
+	{
+		$this->callbackUrl = (string) $callbackUrl;
+
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCallbackUrl()
+	{
+		return $this->callbackUrl;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function __toString()
 	{
-		return "OAuthConsumer[key=$this->key,secret=$this->secret]";
+		return json_encode([
+			'oAuthConsumer' => [
+				'key' => $this->key,
+				'secret' => $this->secret
+			]
+		]);
 	}
 }

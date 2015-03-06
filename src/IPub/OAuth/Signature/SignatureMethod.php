@@ -18,6 +18,14 @@ use IPub;
 use IPub\OAuth;
 use IPub\OAuth\Api;
 
+/**
+ * Abstract definition of request signature
+ *
+ * @package		iPublikuj:OAuth!
+ * @subpackage	Signature
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
+ */
 abstract class SignatureMethod
 {
 	/**

@@ -26,6 +26,7 @@ use IPub\OAuth\Exceptions;
  * @subpackage	Api
  *
  * @author Filip Procházka <filip@prochazka.su>
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
  *
  * @property-read Request $request
  * @property-read string $content

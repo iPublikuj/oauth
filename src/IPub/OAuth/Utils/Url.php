@@ -14,6 +14,14 @@
 
 namespace IPub\OAuth\Utils;
 
+/**
+ * Url utils for sanitizing and collecting url parameters
+ *
+ * @package		iPublikuj:OAuth!
+ * @subpackage	Utils
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
+ */
 class Url
 {
 	/**

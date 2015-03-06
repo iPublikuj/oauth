@@ -68,6 +68,13 @@ abstract class Request extends Nette\Object
 	 */
 	protected $token;
 
+	/**
+	 * Array of available oauth header keys
+	 *
+	 * @var array
+	 */
+	protected $oauthHeader = ['oauth_callback', 'oauth_consumer_key', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method', 'oauth_timestamp', 'oauth_token', 'oauth_version'];
+
 	public function __construct(OAuth\Consumer $consumer, Http\Url $url, $method = self::GET, array $post = [], array $headers = [], OAuth\Token $token = NULL)
 	{
 		$this->consumer = $consumer;
@@ -127,12 +134,7 @@ abstract class Request extends Nette\Object
 	/**
 	 * @return bool
 	 */
-	public function isPaginated()
-	{
-		$params = $this->getParameters();
-
-		return $this->isGet() && (isset($params['per_page']) || isset($params['page']));
-	}
+	abstract public function isPaginated();
 
 	/**
 	 * @return string
@@ -203,22 +205,6 @@ abstract class Request extends Nette\Object
 	 */
 	public function getHeaders()
 	{
-		if ($this->url->getQueryParameter('oauth_token', FALSE) && !$this->url->getQueryParameter('oauth_verifier', FALSE)) {
-			$parameters = $this->getParameters();
-			ksort($parameters, SORT_STRING);
-			$authHeader = NULL;
-
-			foreach ($parameters as $key => $value) {
-				if (strpos($key, 'oauth_') !== FALSE) {
-					$authHeader .= ' ' . $key . '="' . $value . '",';
-				}
-			}
-
-			if ($authHeader) {
-				$this->headers['Authorization'] = 'OAuth ' . trim(rtrim($authHeader, ','));
-			}
-		}
-
 		return $this->headers;
 	}
 
@@ -295,7 +281,7 @@ abstract class Request extends Nette\Object
 		$headers = $this->headers;
 		array_shift($headers); // drop info about HTTP version
 
-		return new static($this->consumer, new Http\Url($url), $this->getMethod(), $this->post, $headers);
+		return new static($this->consumer, new Http\Url($url), $this->getMethod(), $this->post, $headers, $this->token);
 	}
 
 	/**
@@ -335,6 +321,23 @@ abstract class Request extends Nette\Object
 		$signature = $method->buildSignature($this->getSignatureBaseString(), $this->consumer, $this->token);
 
 		$this->url->setQueryParameter('oauth_signature', $signature);
+
+		$parameters = $this->getParameters();
+		ksort($parameters, SORT_STRING);
+		$authHeader = NULL;
+
+		foreach ($parameters as $key => $value) {
+			if (in_array($key, $this->oauthHeader)) {
+				$authHeader .= ' ' . $key . '="' . OAuth\Utils\Url::urlEncodeRFC3986($value) . '",';
+
+				// Remove oauth from query parameter
+				$this->url->setQueryParameter($key, NULL);
+			}
+		}
+
+		if ($authHeader) {
+			$this->headers['Authorization'] = 'OAuth ' . trim(rtrim($authHeader, ','));
+		}
 
 		return $this;
 	}

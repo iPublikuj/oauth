@@ -27,6 +27,8 @@ use IPub\OAuth\Utils;
  *
  * @package		iPublikuj:OAuth!
  * @subpackage	Signature
+ *
+ * @author Adam Kadlec <adam.kadlec@fastybird.com>
  */
 class HMAC_SHA1 extends SignatureMethod
 {
