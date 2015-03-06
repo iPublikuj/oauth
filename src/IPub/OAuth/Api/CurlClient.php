@@ -155,17 +155,16 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 	 */
 	public function makeRequest(Request $request, $signatureMethodName = 'PLAINTEXT')
 	{
+		if (!$signatureMethod = $this->getSignatureMethod($signatureMethodName)) {
+			throw new Exceptions\InvalidArgumentException("Signature method '$signatureMethodName' was not found. Please provide valid signature method name");
+		}
+
 		if (isset($this->memoryCache[$cacheKey = md5(serialize($request))])) {
 			return $this->memoryCache[$cacheKey];
 		}
 
-		if ($signatureMethod = $this->getSignatureMethod($signatureMethodName)) {
-			// Sign request with selected method
-			$request->signRequest($signatureMethod);
-
-		} else {
-			throw new Exceptions\InvalidArgumentException("Signature method '$signatureMethodName' was not found. Please provide valid signature method name");
-		}
+		// Sign request with selected method
+		$request->signRequest($signatureMethod);
 
 		$ch = $this->buildCurlResource($request);
 
