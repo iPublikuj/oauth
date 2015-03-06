@@ -23,10 +23,11 @@ interface HttpClient
 {
 	/**
 	 * @param Api\Request $request
+	 * @param string $signatureMethod
 	 *
 	 * @return Api\Response
 	 *
 	 * @throws Exceptions\ApiException
 	 */
-	function makeRequest(Api\Request $request);
+	function makeRequest(Api\Request $request, $signatureMethod = 'PLAINTEXT');
 }
