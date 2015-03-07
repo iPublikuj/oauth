@@ -54,7 +54,7 @@ class CurlClient extends Nette\Object implements OAuth\HttpClient
 		CURLOPT_TIMEOUT => 20,
 		CURLOPT_USERAGENT => 'ipub-oauth-php',
 		CURLOPT_HTTPHEADER => [
-			'Accept' => 'application/json',
+			'Accept' => '*/*',
 		],
 		CURLINFO_HEADER_OUT => TRUE,
 		CURLOPT_HEADER => TRUE,
