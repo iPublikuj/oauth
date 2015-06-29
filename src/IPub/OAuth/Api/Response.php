@@ -125,7 +125,7 @@ class Response extends Nette\Object
 	{
 		$contentType = $this->getHeaderContentType();
 
-		return $contentType !== NULL && (preg_match('~^text/plain*~is', $contentType) || preg_match('~^text/html*~is', $contentType));
+		return $contentType !== NULL && (preg_match('~^text/plain*~is', $contentType) || preg_match('~^text/html*~is', $contentType) || preg_match('~^application/x-www-form-urlencoded*~is', $contentType));
 	}
 
 	/**
